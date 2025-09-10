@@ -1,0 +1,9 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:keep="@string/gcm_defaultSenderId,@string/google_storage_bucket,@string/project_id,@string/google_api_key,@string/google_crash_reporting_api_key,@string/google_app_id">
+  <string name="gcm_defaultSenderId" translatable="false">638524343044</string>
+  <string name="google_storage_bucket" translatable="false">my-unity-solo-project.firebasestorage.app</string>
+  <string name="project_id" translatable="false">my-unity-solo-project</string>
+  <string name="google_api_key" translatable="false">AIzaSyAVSbgvlweo7aI3yQ9VP32HVLr-maNEtOw</string>
+  <string name="google_crash_reporting_api_key" translatable="false">AIzaSyAVSbgvlweo7aI3yQ9VP32HVLr-maNEtOw</string>
+  <string name="google_app_id" translatable="false">1:638524343044:android:ff19b0dbe436c6d03e0651</string>
+</resources>

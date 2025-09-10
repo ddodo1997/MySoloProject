@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "638524343044",
+    "project_id": "my-unity-solo-project",
+    "storage_bucket": "my-unity-solo-project.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:638524343044:android:ff19b0dbe436c6d03e0651",
+        "android_client_info": {
+          "package_name": "com.ddodo.Myproject"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAVSbgvlweo7aI3yQ9VP32HVLr-maNEtOw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:638524343044:android:f8635d7fb89d5e0d3e0651",
+        "android_client_info": {
+          "package_name": "com.ddodoCom.Unity_Solo_Project"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAVSbgvlweo7aI3yQ9VP32HVLr-maNEtOw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
