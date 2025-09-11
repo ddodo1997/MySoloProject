@@ -6,7 +6,6 @@ using UnityEngine;
 
 public sealed class AccountManager
 {
-
     private static readonly Lazy<AccountManager> lazy = new Lazy<AccountManager>(() => new AccountManager());
     public static AccountManager Instance => lazy.Value;
 
