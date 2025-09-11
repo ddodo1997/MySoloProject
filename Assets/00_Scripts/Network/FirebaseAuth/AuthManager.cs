@@ -9,10 +9,10 @@ public sealed class AuthManager
     public static AuthManager Instance => lazy.Value;
 
     public bool IsFirebaseReady { get; private set; }
-    public bool IsSignInOnProgress {  get; private set; }
+    public bool IsSignInOnProgress { get; private set; }
     public FirebaseAuth auth;
 
-    private AuthManager() { } // 외부 new 차단
+    private AuthManager() { }
 
     public void Initialize(Action<bool> onReady)
     {
@@ -23,12 +23,16 @@ public sealed class AuthManager
                 IsFirebaseReady = true;
                 auth = FirebaseAuth.DefaultInstance;
             }
-            else IsFirebaseReady = false;
+            else
+            {
+                IsFirebaseReady = false;
+                PopupManager.Instance.ShowPopup(t.Exception.Message);
+            }
             onReady?.Invoke(IsFirebaseReady);
         });
     }
 
-    public void SignIn(string email, string password, Action<string> errorAction, Action OnReady)
+    public void SignIn(string email, string password, Action<string> ErrorAction, Action OnReady, Action SceneAction)
     {
         if (!IsFirebaseReady || IsSignInOnProgress || AccountManager.Instance.user != null)
             return;
@@ -42,21 +46,41 @@ public sealed class AuthManager
 
             if (t.IsFaulted)
             {
-                errorAction?.Invoke("Sign-in Failed");
+                FirebaseException firebaseEx = t.Exception?.Flatten().InnerExceptions[0] as FirebaseException;
+                if (firebaseEx != null)
+                {
+                    var code = (AuthError)firebaseEx.ErrorCode;
+                    switch (code)
+                    {
+                        case AuthError.WrongPassword:
+                            ErrorAction("비밀번호가 틀렸습니다.");
+                            break;
+                        case AuthError.UserNotFound:
+                            ErrorAction("등록되지 않은 이메일입니다.");
+                            break;
+                        case AuthError.EmailAlreadyInUse:
+                            ErrorAction("이미 사용 중인 이메일입니다.");
+                            break;
+                        default:
+                            ErrorAction($"로그인 실패: {firebaseEx.Message}");
+                            break;
+
+                    }
+                }
             }
             else if (t.IsCanceled)
             {
-                errorAction?.Invoke("Sign-in Canceld");
+                ErrorAction?.Invoke("Sign-in Canceld");
             }
             else
             {
                 AccountManager.Instance.user = t.Result.User;
-                SceneLoader.Load(Scenes.MatchMakingScene.ToString());
+                SceneAction?.Invoke();
             }
         });
     }
 
-    public void SignUp(string email, string password, Action<string> errorAction, Action OnReady)
+    public void SignUp(string email, string password, Action<string> ErrorAction, Action OnReady, Action SceneAction)
     {
         if (!IsFirebaseReady || IsSignInOnProgress || AccountManager.Instance.user != null)
             return;
@@ -70,16 +94,33 @@ public sealed class AuthManager
 
             if (t.IsFaulted)
             {
-                errorAction?.Invoke("Sign-up Failed");
+                FirebaseException firebaseEx = t.Exception?.Flatten().InnerExceptions[0] as FirebaseException;
+
+                if (firebaseEx != null)
+                {
+                    var code = (AuthError)firebaseEx.ErrorCode;
+                    switch (code)
+                    {
+                        case AuthError.EmailAlreadyInUse:
+                            ErrorAction?.Invoke("이미 등록 된 이메일 입니다.");
+                            break;
+                        case AuthError.WeakPassword:
+                            ErrorAction?.Invoke("비밀번호가 빈약빈약!!!");
+                            break;
+                        default:
+                            ErrorAction($"회원가입 실패 \n ErrorCode : {code.ToString()}");
+                            break;
+                    }
+                }
             }
             else if (t.IsCanceled)
             {
-                errorAction?.Invoke("Sign-up Canceld");
+                ErrorAction?.Invoke("Sign-up Canceld");
             }
             else
             {
                 AccountManager.Instance.user = t.Result.User;
-                SceneLoader.Load(Scenes.MatchMakingScene.ToString());
+                SceneAction?.Invoke();
             }
         });
     }

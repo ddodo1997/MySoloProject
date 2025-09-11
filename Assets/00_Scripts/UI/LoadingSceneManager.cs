@@ -17,32 +17,49 @@ public class LoadingSceneManager : MonoBehaviour
 
     public void Start()
     {
-        signInButton.interactable = false;
-        signUpButton.interactable = false;
+        NotReady();
         AuthManager.Instance.Initialize(x =>
         {
             signInButton.interactable = x;
             signUpButton.interactable = x;
+            //임시 처리
+            var app = FirebaseApp.DefaultInstance;
+            UnityEngine.Debug.Log($"[Firebase] ProjectID: {app.Options.ProjectId}");
+            UnityEngine.Debug.Log($"[Firebase] AppID: {app.Options.AppId}");
+            UnityEngine.Debug.Log($"[Firebase] APIKey: {app.Options.ApiKey}");
+            UnityEngine.Debug.Log($"[Firebase] DatabaseUrl: {app.Options.DatabaseUrl}");
+            //여기까지
         });
         signInButton.onClick.AddListener(SignIn);
         signUpButton.onClick.AddListener(SignUp);
     }
+
     public void SignIn()
     {
-        signInButton.interactable = false;
-        signUpButton.interactable = false;
-        AuthManager.Instance.SignIn(email.text, password.text, Debug.LogError, OnReady);
+        NotReady();
+        AuthManager.Instance.SignIn(email.text, password.text, PopupManager.Instance.ShowPopup, OnReady, OnAuthComplete);
     }
+    public void SignUp()
+    {
+        NotReady();
+        AuthManager.Instance.SignUp(email.text, password.text, PopupManager.Instance.ShowPopup, OnReady, OnAuthComplete);
+    }
+
+
 
     private void OnReady()
     {
         signInButton.interactable = true;
         signUpButton.interactable = true;
     }
-    public void SignUp()
+    private void NotReady()
     {
         signInButton.interactable = false;
         signUpButton.interactable = false;
-        AuthManager.Instance.SignUp(email.text, password.text,Debug.LogError, OnReady);
+    }
+
+    private void OnAuthComplete()
+    {
+        SceneLoader.Load(Scenes.MatchMakingScene.ToString());
     }
 }

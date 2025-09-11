@@ -9,7 +9,6 @@ using UnityEngine.SceneManagement;
 public class SceneLoader
 {
     private static string nextScene;
-
     public static void Load(string sceneName)
     {
         nextScene = sceneName;
@@ -17,7 +16,7 @@ public class SceneLoader
     }
 
     public static async UniTask LoadNextSceneAsync(System.IProgress<float> progress = null)
-    {
+    { 
         var op = SceneManager.LoadSceneAsync(nextScene);
         op.allowSceneActivation = false;
 
