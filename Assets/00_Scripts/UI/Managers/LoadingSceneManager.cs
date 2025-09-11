@@ -22,13 +22,6 @@ public class LoadingSceneManager : MonoBehaviour
         {
             signInButton.interactable = x;
             signUpButton.interactable = x;
-            //임시 처리
-            var app = FirebaseApp.DefaultInstance;
-            UnityEngine.Debug.Log($"[Firebase] ProjectID: {app.Options.ProjectId}");
-            UnityEngine.Debug.Log($"[Firebase] AppID: {app.Options.AppId}");
-            UnityEngine.Debug.Log($"[Firebase] APIKey: {app.Options.ApiKey}");
-            UnityEngine.Debug.Log($"[Firebase] DatabaseUrl: {app.Options.DatabaseUrl}");
-            //여기까지
         });
         signInButton.onClick.AddListener(SignIn);
         signUpButton.onClick.AddListener(SignUp);

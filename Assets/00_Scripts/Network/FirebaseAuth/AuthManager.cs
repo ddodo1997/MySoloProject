@@ -49,23 +49,25 @@ public sealed class AuthManager
                 FirebaseException firebaseEx = t.Exception?.Flatten().InnerExceptions[0] as FirebaseException;
                 if (firebaseEx != null)
                 {
-                    var code = (AuthError)firebaseEx.ErrorCode;
-                    switch (code)
-                    {
-                        case AuthError.WrongPassword:
-                            ErrorAction("비밀번호가 틀렸습니다.");
-                            break;
-                        case AuthError.UserNotFound:
-                            ErrorAction("등록되지 않은 이메일입니다.");
-                            break;
-                        case AuthError.EmailAlreadyInUse:
-                            ErrorAction("이미 사용 중인 이메일입니다.");
-                            break;
-                        default:
-                            ErrorAction($"로그인 실패: {firebaseEx.Message}");
-                            break;
+                    //var code = (AuthError)firebaseEx.ErrorCode;
+                    //switch (code)
+                    //{
+                    //    case AuthError.WrongPassword:
+                    //        ErrorAction("비밀번호가 틀렸습니다.");
+                    //        break;
+                    //    case AuthError.UserNotFound:
+                    //        ErrorAction("등록되지 않은 이메일입니다.");
+                    //        break;
+                    //    case AuthError.EmailAlreadyInUse:
+                    //        ErrorAction("이미 사용 중인 이메일입니다.");
+                    //        break;
+                    //    default:
+                    //        ErrorAction($"로그인 실패: {firebaseEx.Message}");
+                    //        break;
 
-                    }
+                    //}
+                    ErrorAction($"존재하지 않는 ID 이거나 비밀번호가 틀립니다.");
+
                 }
             }
             else if (t.IsCanceled)
