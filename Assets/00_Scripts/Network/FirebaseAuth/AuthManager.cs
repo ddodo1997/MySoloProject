@@ -1,116 +1,86 @@
 using Firebase;
 using Firebase.Auth;
 using Firebase.Extensions;
-using System.Collections;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using TMPro;
-using UnityEngine;
-using UnityEngine.UI;
+using System;
 
-public class AuthManager : MonoBehaviour
+public sealed class AuthManager
 {
+    private static readonly Lazy<AuthManager> lazy = new Lazy<AuthManager>(() => new AuthManager());
+    public static AuthManager Instance => lazy.Value;
+
     public bool IsFirebaseReady { get; private set; }
-    public bool IsSignInOnProgress { get; private set; }
-    public TMP_InputField email;
-    public TMP_InputField password;
-    public Button signInButton;
-    public Button signUpButton;
+    public bool IsSignInOnProgress {  get; private set; }
+    public FirebaseAuth auth;
 
-    public static FirebaseApp firebaseApp;
-    public static FirebaseAuth auth;
-    public static FirebaseUser user;
+    private AuthManager() { } // 외부 new 차단
 
-    public void Start()
+    public void Initialize(Action<bool> onReady)
     {
-        signInButton.interactable = false;
-        signUpButton.interactable = false;
         FirebaseApp.CheckAndFixDependenciesAsync().ContinueWithOnMainThread(t =>
         {
-            var result = t.Result;
-            if (result != DependencyStatus.Available)
-            {
-                Debug.Log(result.ToString());
-                IsFirebaseReady = false;
-            }
-            else
+            if (t.Result == DependencyStatus.Available)
             {
                 IsFirebaseReady = true;
-                firebaseApp = FirebaseApp.DefaultInstance;
                 auth = FirebaseAuth.DefaultInstance;
             }
-            signUpButton.interactable = IsFirebaseReady;
-            signInButton.interactable = IsFirebaseReady;
+            else IsFirebaseReady = false;
+            onReady?.Invoke(IsFirebaseReady);
         });
-
-        signInButton.onClick.AddListener(SignIn);
-        signUpButton.onClick.AddListener(SignUp);
     }
-    public void SignIn()
+
+    public void SignIn(string email, string password, Action<string> errorAction, Action OnReady)
     {
-        if (!IsFirebaseReady || IsSignInOnProgress || user != null)
+        if (!IsFirebaseReady || IsSignInOnProgress || AccountManager.Instance.user != null)
             return;
 
         IsSignInOnProgress = true;
-        signInButton.interactable = false;
-        signUpButton.interactable = false;
 
-        auth.SignInWithEmailAndPasswordAsync(email.text, password.text).ContinueWithOnMainThread(t =>
+        auth.SignInWithEmailAndPasswordAsync(email, password).ContinueWithOnMainThread(t =>
         {
-            Debug.Log($"Sign in status : {t.Status}");
-
             IsSignInOnProgress = false;
-            signInButton.interactable = true;
-            signUpButton.interactable = true;
+            OnReady?.Invoke();
 
             if (t.IsFaulted)
             {
-                Debug.LogError(t.Exception.ToString());
+                errorAction?.Invoke("Sign-in Failed");
             }
             else if (t.IsCanceled)
             {
-                Debug.LogError("Sign-in canceled");
+                errorAction?.Invoke("Sign-in Canceld");
             }
             else
             {
-                user = t.Result.User;
-                Debug.Log(user.Email);
+                AccountManager.Instance.user = t.Result.User;
                 SceneLoader.Load(Scenes.MatchMakingScene.ToString());
             }
         });
-
     }
-    public void SignUp()
+
+    public void SignUp(string email, string password, Action<string> errorAction, Action OnReady)
     {
-        if (!IsFirebaseReady || IsSignInOnProgress || user != null)
+        if (!IsFirebaseReady || IsSignInOnProgress || AccountManager.Instance.user != null)
             return;
 
         IsSignInOnProgress = true;
-        signInButton.interactable = false;
-        signUpButton.interactable = false;
 
-        auth.CreateUserWithEmailAndPasswordAsync(email.text, password.text).ContinueWithOnMainThread(t =>
+        auth.CreateUserWithEmailAndPasswordAsync(email, password).ContinueWithOnMainThread(t =>
         {
-            Debug.Log($"Sign Up Status : {t.Status}");
-
             IsSignInOnProgress = false;
-            signInButton.interactable = true;
-            signUpButton.interactable = true;
+            OnReady?.Invoke();
 
             if (t.IsFaulted)
             {
-                Debug.LogError(t.Exception.ToString());
+                errorAction?.Invoke("Sign-up Failed");
             }
             else if (t.IsCanceled)
             {
-                Debug.LogError("Sign Up canceled");
+                errorAction?.Invoke("Sign-up Canceld");
             }
             else
             {
-                user = t.Result.User;
-                Debug.Log(user.Email);
+                AccountManager.Instance.user = t.Result.User;
+                SceneLoader.Load(Scenes.MatchMakingScene.ToString());
             }
         });
-
     }
 }
