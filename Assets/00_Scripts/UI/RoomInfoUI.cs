@@ -14,7 +14,7 @@ public class RoomInfoUI : MonoBehaviour
     private void Start()
     {
         roomButton = GetComponent<Button>();
-        roomButton.onClick.AddListener(() => MatchMakingManager.Instance.JoinRoom(roomName.text));
+        roomButton.onClick.AddListener(() => PhotonManager.Instance.JoinRoom(roomName.text));
     }
     public void Refresh(string roomName, int userCnt)
     {
@@ -26,5 +26,9 @@ public class RoomInfoUI : MonoBehaviour
     private void Blocking(bool isConnectable)
     {
         blockingImage.gameObject.SetActive(isConnectable);
+    }
+    private void OnDestroy()
+    {
+        roomButton.onClick.RemoveAllListeners();
     }
 }

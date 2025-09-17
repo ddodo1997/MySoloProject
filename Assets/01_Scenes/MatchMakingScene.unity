@@ -956,11 +956,11 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 1677642853}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
-  m_Pivot: {x: 0.5, y: 0.5}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 296.5, y: 0}
+  m_SizeDelta: {x: 593, y: 0}
+  m_Pivot: {x: 0.5, y: 1}
 --- !u!222 &326246140
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -2155,7 +2155,6 @@ MonoBehaviour:
   roomScrollView: {fileID: 1852912921}
   roomInfoObj: {fileID: 6295439710788485875, guid: bc4d72647839e4f40a07a7ed6a9dcf85,
     type: 3}
-  currentRoomList: []
 --- !u!4 &1286295087
 Transform:
   m_ObjectHideFlags: 0
@@ -3012,6 +3011,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1992404693}
   - component: {fileID: 1992404692}
+  - component: {fileID: 1992404694}
   m_Layer: 0
   m_Name: MatchMakingManager
   m_TagString: Untagged
@@ -3046,6 +3046,28 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1992404694
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1992404691}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ObservedComponentsFoldoutOpen: 1
+  Group: 0
+  prefixField: -1
+  Synchronization: 3
+  OwnershipTransfer: 0
+  observableSearch: 2
+  ObservedComponents: []
+  sceneViewId: 1
+  InstantiationId: 0
+  isRuntimeInstantiated: 0
 --- !u!1 &1998161858
 GameObject:
   m_ObjectHideFlags: 0

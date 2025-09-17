@@ -15,9 +15,10 @@ public class ButtonManager : MonoBehaviour
         randomMatchButton.interactable = false;
         makeRoomButton.interactable = false;
 
-        var matchManager = MatchMakingManager.Instance;
+        var matchManager = PhotonManager.Instance;
         matchManager.CompletedAction += ButtonInteractable;
         makeRoomButton.onClick.AddListener(() => roomMaker.gameObject.SetActive(true));
+        randomMatchButton.onClick.AddListener(PhotonManager.Instance.JoinRandomRoom);
     }
 
     private void ButtonInteractable(bool value)
@@ -28,7 +29,7 @@ public class ButtonManager : MonoBehaviour
 
     private void OnDestroy()
     {
-        MatchMakingManager.Instance.CompletedAction -= ButtonInteractable;
+        PhotonManager.Instance.CompletedAction -= ButtonInteractable;
         randomMatchButton.onClick.RemoveAllListeners();
         makeRoomButton.onClick.RemoveAllListeners();
     }

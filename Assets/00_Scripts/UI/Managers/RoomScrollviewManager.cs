@@ -8,28 +8,39 @@ public class RoomScrollviewManager : MonoBehaviour
 {
     [SerializeField] private ScrollRect roomScrollView;
     [SerializeField] private GameObject roomInfoObj;
-    [SerializeField] private List<GameObject> currentRoomList;
+    [SerializeField] private Dictionary<string, GameObject> currentRoomUIDict = new();
     private void Start()
     {
-        MatchMakingManager.Instance.RefreshAction += Refresh;
+        PhotonManager.Instance.RefreshAction += Refresh;
     }
 
-    public void Refresh(List<RoomInfo> rooms)
+    public void Refresh(List<RoomInfo> removedRooms, List<RoomInfo> addedRooms)
     {
-        foreach (var roomGO in currentRoomList)
-            Destroy(roomGO);
-        currentRoomList.Clear();
-
-        foreach (var room in rooms)
+        foreach (var room in removedRooms)
         {
-            var newRoom = Instantiate(roomInfoObj, roomScrollView.content);
-            currentRoomList.Add(newRoom);
-            newRoom.GetComponent<RoomInfoUI>().Refresh(room.Name, room.PlayerCount);
+            if (currentRoomUIDict.TryGetValue(room.Name, out var roomGO))
+            { 
+                Destroy(roomGO); 
+                currentRoomUIDict.Remove(room.Name);
+            }
+        }
+        foreach(var room in addedRooms)
+        {
+            if (currentRoomUIDict.TryGetValue(room.Name, out var roomGO))
+            {
+                roomGO.GetComponent<RoomInfoUI>()?.Refresh(room.Name, room.PlayerCount);
+            }
+            else
+            { 
+                var newGO = Instantiate(roomInfoObj, roomScrollView.content);
+                newGO.GetComponent<RoomInfoUI>()?.Refresh(room.Name, room.PlayerCount);
+                currentRoomUIDict[room.Name] = newGO;
+            }
         }
     }
 
     private void OnDestroy()
     {
-        MatchMakingManager.Instance.RefreshAction -= Refresh;
+        PhotonManager.Instance.RefreshAction -= Refresh;
     }
 }

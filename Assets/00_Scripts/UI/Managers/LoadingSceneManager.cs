@@ -53,6 +53,6 @@ public class LoadingSceneManager : MonoBehaviour
 
     private void OnAuthComplete()
     {
-        SceneLoader.Load(Scenes.MatchMakingScene.ToString());
+        SceneLoader.Load(Scenes.MatchMakingScene);
     }
 }

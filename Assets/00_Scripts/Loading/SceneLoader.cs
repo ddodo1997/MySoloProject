@@ -9,9 +9,9 @@ using UnityEngine.SceneManagement;
 public class SceneLoader
 {
     private static string nextScene;
-    public static void Load(string sceneName)
+    public static void Load(Scenes sceneName)
     {
-        nextScene = sceneName;
+        nextScene = sceneName.ToString();
         SceneManager.LoadScene(Scenes.LoadingScene.ToString());
     }
 

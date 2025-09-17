@@ -4,5 +4,6 @@ public enum Scenes
     LobbyScene,
     ChooseCharactorScene,
     MatchMakingScene,
+    InRoomScene,
     InGameScene,
 }

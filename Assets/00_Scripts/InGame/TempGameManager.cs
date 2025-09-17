@@ -36,6 +36,6 @@ public class TempGameManager : MonoBehaviourPunCallbacks
 
     public override void OnLeftRoom()
     {
-        SceneLoader.Load(Scenes.MatchMakingScene.ToString());
+        SceneLoader.Load(Scenes.MatchMakingScene);
     }
 }

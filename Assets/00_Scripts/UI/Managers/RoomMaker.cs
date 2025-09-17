@@ -26,7 +26,7 @@ public class RoomMaker : MonoBehaviour
         {
             PopupManager.Instance.ShowPopup("방 이름을 설정 해 주세요.");
         }
-        MatchMakingManager.Instance.CreateRoom(roomName.text);
+        PhotonManager.Instance.CreateRoom(roomName.text);
     }
 
     private void OnDestroy()
