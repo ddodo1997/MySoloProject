@@ -6,6 +6,16 @@ using System.Collections.Generic;
 
 public class PhotonManager : MonoBehaviourPunCallbacks
 {
+    #region bools
+    public bool IsMaster
+    {
+        get
+        {
+            return PhotonNetwork.LocalPlayer.IsMasterClient;
+        }
+    }
+    public string NickName => PhotonNetwork.NickName;
+    #endregion
     public static PhotonManager Instance { get; private set; }
 
     private readonly string gameVersion = "1.0";
@@ -15,12 +25,17 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         get { return gameUser; }
     }
 
+    #region Actions
     public Action<bool> CompletedAction;
     public Action<List<RoomInfo>, List<RoomInfo>> RefreshAction;
     public Action<bool> InRoomPropChangeAction;
     public Action<bool> OnMasterClientSwitchedAction;
     public Action<bool> OnEnterRoomIsLocalAction;
     public Action<bool> OnEnterRoomIsMasterAction;
+    public Action<Dictionary<int, Player>> OnPlayerEnteredRoomAction;
+    public Action<Dictionary<int, Player>> OnPlayerLeftRoomAction;
+    #endregion
+
     private void Awake()
     {
         if (Instance != null && Instance != this) { Destroy(gameObject); return; }
@@ -31,6 +46,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     private void Start()
     {
         PhotonNetwork.GameVersion = gameVersion;
+        PhotonNetwork.NickName = AccountManager.Instance.Email;
         PhotonNetwork.ConnectUsingSettings();
     }
     #region 로비
@@ -99,49 +115,24 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     #region 방 내부
     public override void OnPlayerEnteredRoom(Player newPlayer)
     {
-        
+        OnPlayerEnteredRoomAction?.Invoke(PhotonNetwork.CurrentRoom.Players);
+    }
+    public override void OnPlayerLeftRoom(Player otherPlayer)
+    {
+        OnPlayerLeftRoomAction?.Invoke(PhotonNetwork.CurrentRoom.Players);
     }
     public override void OnMasterClientSwitched(Player newMasterClient)
     {
-        OnMasterClientSwitchedAction?.Invoke(PhotonNetwork.IsMasterClient);
+        OnMasterClientSwitchedAction?.Invoke(IsMaster);
     }
     public override void OnPlayerPropertiesUpdate(Player targetPlayer, Hashtable changedProps)
     {
-        if (PhotonNetwork.IsMasterClient)
-        {
-            bool allReady = true;
-            foreach (var player in PhotonNetwork.PlayerList)
-            {
-                if (player.CustomProperties.TryGetValue("isReady", out var isReadyObj))
-                {
-                    if (!(bool)isReadyObj)
-                    {
-                        allReady = false;
-                        break;
-                    }
-                }
-                else
-                {
-                    allReady = false;
-                    break;
-                }
-            }
-
-            InRoomPropChangeAction?.Invoke(allReady);
-        }
-        else
-        {
-            if (changedProps.TryGetValue("isReady", out var isReadyObj))
-            {
-                bool isReady = (bool)isReadyObj;
-                InRoomPropChangeAction?.Invoke(isReady);
-            }
-        }
+        InRoomPropChangeAction?.Invoke(IsAllReady());
     }
 
     public void Ready()
     {
-        if (!PhotonNetwork.IsMasterClient)
+        if (!IsMaster)
         {
             gameUser.isReady = !gameUser.isReady;
             Hashtable props = new Hashtable();
@@ -151,7 +142,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     }
     public void GameStart()
     {
-        if (PhotonNetwork.IsMasterClient)
+        if (IsMaster)
         {
             if (PhotonNetwork.CurrentRoom.PlayerCount <= 1)
             {
@@ -159,10 +150,12 @@ public class PhotonManager : MonoBehaviourPunCallbacks
                 return;
             }
             if (!IsAllReady())
+            {
+                PopupManager.Instance.ShowPopup("모든 플레이어가 준비되지 않았습니다.");
                 return;
-
+            }
             gameUser.isReady = false;
-            photonView.RPC("RPC_LoadGameScene", RpcTarget.AllBuffered, Scenes.InGameScene);
+            RPCRelay.Instance.photonView.RPC("RPC_LoadGameScene", RpcTarget.AllBuffered, Scenes.InGameScene);
         }
     }
 
@@ -190,7 +183,6 @@ public class PhotonManager : MonoBehaviourPunCallbacks
 
         if (!allReady)
         {
-            PopupManager.Instance.ShowPopup("모든 플레이어가 준비되지 않았습니다.");
             return false;
         }
         return true;
@@ -205,13 +197,6 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         SceneLoader.Load(Scenes.MatchMakingScene);
         if (!PhotonNetwork.InLobby)
             PhotonNetwork.JoinLobby();
-    }
-    #endregion
-    #region RPC
-    [PunRPC]
-    private void RPC_LoadGameScene(Scenes scene)
-    {
-        SceneLoader.Load(scene);
     }
     #endregion
 }

@@ -10,5 +10,5 @@ public sealed class AccountManager
     public static AccountManager Instance => lazy.Value;
 
     public FirebaseUser user;
-
+    public string Email => user.Email;
 }
