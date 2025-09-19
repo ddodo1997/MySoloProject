@@ -5,4 +5,5 @@ using UnityEngine;
 public class GameUser
 {
     public bool isReady = false;
+    public SelectedCharacterData characterData;
 }

@@ -7,3 +7,8 @@ public enum Scenes
     InRoomScene,
     InGameScene,
 }
+
+public enum DataTables
+{
+    SelectedCharacterTable,
+}
