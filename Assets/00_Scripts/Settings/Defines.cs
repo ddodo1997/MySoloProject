@@ -12,3 +12,8 @@ public enum DataTables
 {
     SelectedCharacterTable,
 }
+
+public enum GameEvents : byte
+{
+    LoadGameScene = 1,
+}

@@ -15,9 +15,9 @@ public class SceneLoader
         SceneManager.LoadScene(Scenes.LoadingScene.ToString());
     }
 
-    public static async UniTask LoadNextSceneAsync(System.IProgress<float> progress = null)
+    public static async UniTask LoadNextSceneAsync(IProgress<float> progress = null)
     { 
-        var op = SceneManager.LoadSceneAsync(nextScene);
+        var op = SceneManager.LoadSceneAsync(nextScene,LoadSceneMode.Single);
         op.allowSceneActivation = false;
 
         while (op.progress < 0.9f)

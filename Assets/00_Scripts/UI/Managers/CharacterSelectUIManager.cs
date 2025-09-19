@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -12,6 +13,7 @@ public class CharacterSelectUIManager : MonoBehaviour
     private void Start()
     {
         Init();
+        PhotonManager.Instance.CurrentUser.characterData = characterButtonList.First().GetComponent<SelectedCharacterInfoUI>().characterData;
     }
     private void Init()
     {

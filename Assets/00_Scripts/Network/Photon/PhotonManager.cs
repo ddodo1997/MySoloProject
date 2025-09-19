@@ -3,6 +3,7 @@ using Photon.Pun;
 using Photon.Realtime;
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 public class PhotonManager : MonoBehaviourPunCallbacks
 {
@@ -49,6 +50,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         PhotonNetwork.NickName = AccountManager.Instance.Email;
         PhotonNetwork.ConnectUsingSettings();
     }
+
     #region ·Îºñ
     public override void OnConnectedToMaster()
     {
@@ -155,7 +157,12 @@ public class PhotonManager : MonoBehaviourPunCallbacks
                 return;
             }
             gameUser.isReady = false;
-            RPCRelay.Instance.photonView.RPC("RPC_LoadGameScene", RpcTarget.AllBuffered, Scenes.InGameScene);
+            object content = Scenes.InGameScene;
+            RaiseEventOptions options = new RaiseEventOptions
+            {
+                Receivers = ReceiverGroup.All
+            };
+            PhotonNetwork.RaiseEvent((byte)GameEvents.LoadGameScene, content, options, SendOptions.SendReliable);
         }
     }
 
