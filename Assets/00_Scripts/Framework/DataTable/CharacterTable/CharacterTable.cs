@@ -2,23 +2,18 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class SelectedCharacterTable : DataTable
+public class CharacterTable : DataTable
 {
-    public Dictionary<int, SelectedCharacterData> Data = new();
+    public Dictionary<int, CharacterData> Data = new();
 
-    public List<SelectedCharacterData> GetSelectedCharacterDatas()
+    public CharacterData GetCharacterData(int id)
     {
-        List<SelectedCharacterData> datas = new List<SelectedCharacterData>();
-        foreach (SelectedCharacterData data in Data.Values)
-        {
-            datas.Add(data);
-        }
-        return datas;
+        return Data[id];
     }
 
     public override void Load()
     {
-        var result = LoadCsv<SelectedCharacterData>("selectedCharacterTable");
+        var result = LoadCsv<CharacterData>("characterTable");
         foreach (var row in result)
         {
             if (Data.ContainsKey(row.characterID)) continue;

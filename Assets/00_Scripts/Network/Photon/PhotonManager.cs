@@ -104,10 +104,18 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         }
     }
     #endregion
-    #region 방 입장
+    #region 방 입장    
+    public void SeedRegist()
+    {
+        int seed = DateTime.Now.GetHashCode();
+        Hashtable props = new Hashtable { { "mapSeed", seed } };
+        PhotonNetwork.CurrentRoom.SetCustomProperties(props);
+    }
     public override void OnJoinedRoom()
     {
         SceneLoader.Load(Scenes.InRoomScene);
+        if(IsMaster)
+            SeedRegist();
     }
     public void JoinRoom(string roomName)
     {
@@ -115,6 +123,11 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     }
     #endregion
     #region 방 내부
+    public int ReturnSeed()
+    {
+        return (int)PhotonNetwork.CurrentRoom.CustomProperties["mapSeed"];
+    }
+
     public override void OnPlayerEnteredRoom(Player newPlayer)
     {
         OnPlayerEnteredRoomAction?.Invoke(PhotonNetwork.CurrentRoom.Players);
@@ -205,5 +218,9 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         if (!PhotonNetwork.InLobby)
             PhotonNetwork.JoinLobby();
     }
+    #endregion
+    #region 인게임
+
+
     #endregion
 }
