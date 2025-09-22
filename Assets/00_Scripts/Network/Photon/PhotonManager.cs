@@ -114,7 +114,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     public override void OnJoinedRoom()
     {
         SceneLoader.Load(Scenes.InRoomScene);
-        if(IsMaster)
+        if (IsMaster)
             SeedRegist();
     }
     public void JoinRoom(string roomName)
@@ -123,7 +123,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     }
     #endregion
     #region ¹æ ³»ºÎ
-    public int ReturnSeed()
+    public int GetSeed()
     {
         return (int)PhotonNetwork.CurrentRoom.CustomProperties["mapSeed"];
     }

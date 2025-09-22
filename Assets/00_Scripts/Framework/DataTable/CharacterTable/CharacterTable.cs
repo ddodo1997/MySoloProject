@@ -16,8 +16,8 @@ public class CharacterTable : DataTable
         var result = LoadCsv<CharacterData>("characterTable");
         foreach (var row in result)
         {
-            if (Data.ContainsKey(row.characterID)) continue;
-            Data.Add(row.characterID, row);
+            if (Data.ContainsKey(row.CharacterID)) continue;
+            Data.Add(row.CharacterID, row);
         }
     }
 }

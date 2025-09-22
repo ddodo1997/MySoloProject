@@ -19,6 +19,14 @@ public enum GameEvents : byte
 {
     LoadGameScene = 1,
 }
+public enum TileType
+{
+    Wall = 0,
+    Normal,
+    Heal,
+    Trap,
+    Spawn
+}
 
 public static class Defines
 {

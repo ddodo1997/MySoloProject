@@ -5,13 +5,13 @@ using Unity.VisualScripting;
 using UnityEngine;
 
 public class TileGenerator : MonoBehaviour
-{
+{ 
     [SerializeField] private Grid grid;
     [SerializeField] private GameObject[] tilePrefabs; // 0: wall, 1: normal, 2: heal, 3: trap
     [SerializeField] private Vector2Int size;
-    [SerializeField] private TileBehavior[,] tileMap;
+    [SerializeField] public TileBehavior[,] tileMap;
 
-    public int[,] MapTiles;
+    public TileType[,] MapTiles;
     public int mapSeed;
 
 
@@ -35,43 +35,45 @@ public class TileGenerator : MonoBehaviour
         ApplyCellularAutomata();
         ApplyMSTandCarveCorridor();
         SpecialTileGenerate();
+        SpawnPointRegist();
         MakeMap();
     }
 
     private void InitializeMap()
     {
-        MapTiles = new int[size.x, size.y];
+        MapTiles = new TileType[size.x, size.y];
         UnityEngine.Random.InitState(mapSeed);
         for (int x = 0; x < size.x; x++)
         {
             for (int y = 0; y < size.y; y++)
             {
                 if (x == 0 || y == 0 || x == size.x - 1 || y == size.y - 1)
-                    MapTiles[x, y] = 0;
+                    MapTiles[x, y] = TileType.Wall;
                 else
-                    MapTiles[x, y] = (UnityEngine.Random.Range(0, 100) < wallPercent) ? 0 : 1;
+                    MapTiles[x, y] = (UnityEngine.Random.Range(0, 100) < wallPercent) ? TileType.Wall : TileType.Normal;
             }
         }
     }
     #region CellularAutomata
     /// <summary>
-    /// 셀룰러오토마타 알고리즘
-    /// 모든 타일을 돌며 주위8방향 타일중 벽이 cellularRule보다 많다면 자신을 벽으로, 아니라면 일반타일로 변경
+    /// 셀룰러 오토마타(Cellular Automata) 알고리즘 적용
+    /// 맵의 각 셀을 검사하여, 주변 8방향의 벽 개수가 cellularRule 이상이면 벽으로,
+    /// 그렇지 않으면 일반 타일로 설정하여 맵을 점차 다듬는다.
     /// </summary>
     private void ApplyCellularAutomata()
     {
         for (int i = 0; i < cellularRepeatCnt; i++)
         {
-            int[,] newMap = (int[,])MapTiles.Clone();
+            TileType[,] newMap = (TileType[,])MapTiles.Clone();
             for (int x = 1; x < size.x - 1; x++)
             {
                 for (int y = 1; y < size.y - 1; y++)
                 {
                     int wallCnt = CountWallNeighbors(x, y);
                     if (wallCnt >= cellularRule)
-                        newMap[x, y] = 0;
+                        newMap[x, y] = TileType.Wall;
                     else
-                        newMap[x, y] = 1;
+                        newMap[x, y] = TileType.Normal;
                 }
             }
             MapTiles = newMap;
@@ -107,7 +109,12 @@ public class TileGenerator : MonoBehaviour
         public int index;
         public Vector2Int GetCentroidCell() => new Vector2Int(Mathf.RoundToInt(centroid.x), Mathf.RoundToInt(centroid.y));
     }
-    private bool isWalkable(int x, int y) => MapTiles[x, y] != 0;
+    private bool isWalkable(int x, int y) => MapTiles[x, y] != TileType.Wall;
+
+    /// <summary>
+    /// BFS 기반으로 맵 전체에서 연결된 Walkable 영역(Region)을 찾아낸다.
+    /// 각 영역은 고유 index, 타일 목록, 중심점(centroid)을 가진다.
+    /// </summary>
     private List<Region> FindRegions()
     {
         int idx = 0;
@@ -160,7 +167,9 @@ public class TileGenerator : MonoBehaviour
         }
         return regions;
     }
-
+    /// <summary>
+    /// 주어진 Region의 모든 타일 좌표 평균을 내어 중심 좌표(centroid)를 계산한다.
+    /// </summary>
     private void ComputeRegionCentroid(Region region)
     {
         if (region.tiles.Count == 0)
@@ -215,7 +224,10 @@ public class TileGenerator : MonoBehaviour
             parent[Find(a.index)] = Find(b.index);
         }
     }
-
+    /// <summary>
+    /// 맵에서 발견된 Region들을 MST로 연결하고,
+    /// 각 MST 간선을 따라 복도를 깎아 최종적으로 연결된 맵을 만든다.
+    /// </summary>
     private List<Edge> BuildMST()
     {
         List<Region> regions = FindRegions();
@@ -252,13 +264,13 @@ public class TileGenerator : MonoBehaviour
 
         while (currentCell.x != endCell.x)
         {
-            MapTiles[currentCell.x, currentCell.y] = 1;
+            MapTiles[currentCell.x, currentCell.y] = TileType.Normal;
             currentCell.x += (endCell.x > currentCell.x) ? 1 : -1;
         }
 
         while (currentCell.y != endCell.y)
         {
-            MapTiles[currentCell.x, currentCell.y] = 1;
+            MapTiles[currentCell.x, currentCell.y] = TileType.Normal;
             currentCell.y += (endCell.y > currentCell.y) ? 1 : -1;
         }
     }
@@ -280,11 +292,11 @@ public class TileGenerator : MonoBehaviour
         var normalTiles = FindNormalTiles();
         foreach (var normalTile in normalTiles)
         {
-            int randVal = UnityEngine.Random.Range(0, normalTiles.Count);
+            int randVal = UnityEngine.Random.Range(0, 100);
             if (randVal <= healPercent)
-                MapTiles[normalTile.x, normalTile.y] = 2;
+                MapTiles[normalTile.x, normalTile.y] = TileType.Heal;
             else if (randVal <= healPercent + trapPercent)
-                MapTiles[normalTile.x, normalTile.y] = 3;
+                MapTiles[normalTile.x, normalTile.y] = TileType.Trap;
         }
     }
     private List<Vector2Int> FindNormalTiles()
@@ -293,10 +305,23 @@ public class TileGenerator : MonoBehaviour
         for (int x = 1; x < size.x - 1; x++)
             for (int y = 1; y < size.y - 1; y++)
             {
-                if (MapTiles[x, y] == 1)
+                if (MapTiles[x, y] == TileType.Normal)
                     normalTiles.Add(new Vector2Int(x, y));
             }
         return normalTiles;
+    }
+
+    #endregion
+    #region CharactorSpawnPoint
+    private void SpawnPointRegist() 
+    {
+        UnityEngine.Random.InitState(mapSeed);
+        var normalTiles = FindNormalTiles();
+        var quad = normalTiles.Count / 4;
+        var player1Spawn = UnityEngine.Random.Range(0, quad);
+        var player2Spawn = UnityEngine.Random.Range(normalTiles.Count - quad , normalTiles.Count);
+        MapTiles[normalTiles[player1Spawn].x, normalTiles[player1Spawn].y] = TileType.Spawn;
+        MapTiles[normalTiles[player2Spawn].x, normalTiles[player2Spawn].y] = TileType.Spawn;
     }
 
     #endregion
@@ -308,7 +333,7 @@ public class TileGenerator : MonoBehaviour
             for (int y = 0; y < size.y; y++)
             {
                 Vector3 pos = grid.CellToWorld(new Vector3Int(x, y, 0));
-                tileMap[x, y] = Instantiate(tilePrefabs[MapTiles[x, y]], pos, Quaternion.identity, transform).GetComponent<TileBehavior>();
+                tileMap[x, y] = Instantiate(tilePrefabs[(int)MapTiles[x, y]], pos, Quaternion.identity, transform).GetComponent<TileBehavior>();
             }
         }
     }
